@@ -30,7 +30,7 @@
     <header><a href="" data-screen="div1">Story of the Day!</a>
     <a href="" data-screen="div2">Take a picture of yourself!</a>
     <a href="" data-screen="div3">Data of Towed Cars</a>
-    <a href="" data-screen="div4">Div 4</a></header>
+    <a href="" data-screen="div4">Names with S</a></header>
     
     <div id="div1" class="screen">
     <h2>There's many top stories to read, please choose any of the following:</h2>
@@ -286,10 +286,88 @@
     </div>
     
     <div id="div4" class="screen">
-      Div4
+
+        <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+        <script>
+            // let db;
+            // const request = indexedDB.open("MyTestDatabase");
+            // request.onerror = (event) => {
+            //     console.error("Why didn't you allow my web app to use IndexedDB?!");
+            // };
+            // request.onsuccess = (event) => {
+            //     db = event.target.result;
+            // };
+
+            var db = new Dexie("FriendDatabase");
+
+    // DB with single table "friends" with primary key "id" and
+    // indexes on properties "name" and "age"
+    db.version(1).stores({
+      friends: `
+        id,
+        name,
+        age`,
+    });
+
+    // Now add some values.
+    db.friends.bulkPut([
+      { id: 1, name: "Josephine", age: 21 },
+      { id: 2, name: "Per", age: 75 },
+      { id: 3, name: "Simon", age: 5 },
+      { id: 4, name: "Sara", age: 50, notIndexedProperty: 'foo' }
+    ]).then(() => {
+
+      return db.friends.where("age").between(0, 25).toArray();
+
+    }).then(friends => {
+
+      console.log(("Found young friends: " +
+        friends.map(friend => friend.name)));
+
+      return db.friends
+        .orderBy("age")
+        .reverse()
+        .toArray();
+
+    }).then(friends => {
+
+      console.log(("Friends in reverse age order: " +
+        friends.map(friend => `${friend.name} ${friend.age}`)));
+
+      return db.friends.where('name').startsWith("S").keys();
+
+    }).then(friendNames => {
+
+      console.log(("Friends on 'S': " + friendNames));
+        let theNames = document.createElement("h2");
+        theNames.innerText = "Names that start with S: " + friendNames;
+        document.getElementById('div4').append(theNames);
+
+    }).catch(err => {
+
+      console.log(("Ouch... " + err));
+
+    });
+
+            
+        </script>
+        
+
+
+
+
+        
     </div>
 
     <script>
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", function() {
+                navigator.serviceWorker
+                .register("/serviceWorker.js")
+                .then(res => console.log("service worker registered"))
+                .catch(err => console.log("service worker not registered", err))
+            })
+        }
     
     // document.querySelector("#div1").style.display = "block";
       
